@@ -2,13 +2,9 @@
 
 require 'rails_helper'
 
-RSpec.describe AskVAApi::Inquiries::Creator do
-  let(:icn) { '123456' }
-  let(:service) { instance_double(Crm::Service) }
-  let(:creator) { described_class.new(icn:, service:) }
-  let(:file_path) { 'modules/ask_va_api/config/locales/get_inquiries_mock_data.json' }
-  let(:base64_encoded_file) { Base64.strict_encode64(File.read(file_path)) }
-  let(:file) { "data:image/png;base64,#{base64_encoded_file}" }
+RSpec.describe AskVAApi::Translator do
+  subject(:translator) { AskVAApi::Translator.new(inquiry_params:) }
+
   let(:inquiry_params) do
     { 'are_you_the_dependent' => 'false',
       'attachment_present' => 'true',
@@ -26,7 +22,7 @@ RSpec.describe AskVAApi::Inquiries::Creator do
       'dependant_last_name' => nil,
       'dependant_middle_name' => nil,
       'dependant_province' => '722310005',
-      'dependant_relationship' => '722310006',
+      'dependant_relationship' => 'Other',
       'dependant_ssn' => nil,
       'dependant_state' => nil,
       'dependant_street_address' => nil,
@@ -35,22 +31,23 @@ RSpec.describe AskVAApi::Inquiries::Creator do
       'email_confirmation' => 'vets.gov.user+119@gmail.com',
       'first_name' => 'Glen',
       'gender' => 'M',
-      'inquiry_about' => '722310000',
+      'inquiry_about' => 'A general question',
       'inquiry_category' => '5c524deb-d864-eb11-bb24-000d3a579c45',
-      'inquiry_source' => '722310004',
+      'inquiry_source' => 'AVA',
       'inquiry_subtopic' => '932a8586-e764-eb11-bb23-000d3a579c3f',
       'inquiry_summary' => 'string',
       'inquiry_topic' => '932a8586-e764-eb11-bb23-000d3a579c3f',
-      'inquiry_type' => '722310001',
+      'inquiry_type' => 'Question',
       'is_va_employee' => 'true',
       'is_veteran' => 'true',
       'is_veteran_an_employee' => 'true',
       'is_veteran_deceased' => 'false',
-      'level_of_authentication' => '722310001',
+      'level_of_authentication' => 'Personal',
       'medical_center' => '07a51029-6816-e611-9436-0050568d743d',
       'middle_name' => 'Lee',
       'preferred_name' => nil,
       'pronouns' => 'He/Him',
+      'response_type' => 'Email',
       'street_address2' => nil,
       'submitter' => '42cc2a0a-2ebf-e711-9495-0050568d63d9',
       'submitter_dependent' => '722310000',
@@ -67,7 +64,7 @@ RSpec.describe AskVAApi::Inquiries::Creator do
       'submitter_street_address' => '4343 Rosemeade Pkwy',
       'submitter_vet_center' => '200ESR',
       'submitter_zip_code_of_residency' => '75287-2950',
-      'suffix' => '722310001',
+      'suffix' => 'Jr',
       'supervisor_flag' => 'true',
       'va_employee_time_stamp' => nil,
       'veteran_city' => 'Dallas',
@@ -87,7 +84,7 @@ RSpec.describe AskVAApi::Inquiries::Creator do
       'veteran_prefered_name' => nil,
       'veteran_pronouns' => 'He/Him',
       'veteran_province' => '722310005',
-      'veteran_relationship' => '722310003',
+      'veteran_relationship' => 'VA Employee',
       'veteran_service_end_date' => '01/01/2000',
       'veteran_service_number' => nil,
       'veteran_service_start_date' => nil,
@@ -133,11 +130,9 @@ RSpec.describe AskVAApi::Inquiries::Creator do
          'state_abbreviation' => '80b9d1e0-d488-eb11-b1ac-001dd8309d89' },
       'attachments' =>
        [{ 'file_name' => 'testfile.pdf',
-          'file_content' => file }] }
+          'file_content' => 'base64 string' }] }
   end
-  let(:endpoint) { AskVAApi::Inquiries::Creator::ENDPOINT }
-  let(:translator) { instance_double(AskVAApi::Translator) }
-  let(:translated_payload) do
+  let(:converted_payload) do
     { AreYouTheDependent: 'false',
       AttachmentPresent: 'true',
       BranchOfService: '722310000',
@@ -261,53 +256,128 @@ RSpec.describe AskVAApi::Inquiries::Creator do
       ListOfAttachments: [{ fileName: 'testfile.pdf',
                             fileContent: 'base64 string' }] }
   end
-
-  before do
-    allow_any_instance_of(Crm::CrmToken).to receive(:call).and_return('token')
-    allow(AskVAApi::Translator).to receive(:new).with(inquiry_params:).and_return(translator)
-    allow(translator).to receive(:call).and_return(translated_payload)
+  let(:cache_data_service) { instance_double(Crm::CacheData) }
+  let(:option_keys) do
+    %w[inquiryabout inquirysource inquirytype levelofauthentication suffix veteranrelationship
+       dependentrelationship responsetype]
   end
+  let(:result) { subject.call }
 
-  describe '#call' do
-    context 'when the API call is successful' do
-      before do
-        allow(service).to receive(:call).and_return({
-                                                      Data: {
-                                                        InquiryNumber: '530d56a8-affd-ee11-a1fe-001dd8094ff1'
-                                                      },
-                                                      Message: '',
-                                                      ExceptionOccurred: false,
-                                                      ExceptionMessage: '',
-                                                      MessageId: 'b8ebd8e7-3bbf-49c5-aff0-99503e50ee27'
-                                                    })
-      end
-
-      it 'assigns VeteranICN and posts data to the service' do
-        response = creator.call(inquiry_params:)
-
-        expect(service).to have_received(:call) do |params|
-          expect(params[:payload][:VeteranICN]).to eq(icn)
-        end
-
-        expect(response).to eq({ InquiryNumber: '530d56a8-affd-ee11-a1fe-001dd8094ff1' })
+  context 'when succesful' do
+    let(:cache_data) do
+      lambda do |option|
+        {
+          'inquiryabout' => { Data: [{ Id: 722_310_003, Name: 'A general question' },
+                                     { Id: 722_310_000, Name: 'About Me, the Veteran' },
+                                     { Id: 722_310_002, Name: 'For the dependent of a Veteran' },
+                                     { Id: 722_310_001, Name: 'On behalf of a Veteran' }] },
+          'inquirysource' => { Data: [{ Id: 722_310_005, Name: 'Phone' },
+                                      { Id: 722_310_004, Name: 'US Mail' },
+                                      { Id: 722_310_000, Name: 'AVA' },
+                                      { Id: 722_310_001, Name: 'Email' },
+                                      { Id: 722_310_002, Name: 'Facebook' }] },
+          'inquirytype' => { Data: [{ Id: 722_310_000, Name: 'Compliment' },
+                                    { Id: 722_310_001, Name: 'Question' },
+                                    { Id: 722_310_002, Name: 'Service Complaint' },
+                                    { Id: 722_310_006, Name: 'Suggestion' },
+                                    { Id: 722_310_004, Name: 'Other' }] },
+          'levelofauthentication' => { Data: [{ Id: 722_310_002, Name: 'Authenticated' },
+                                              { Id: 722_310_000, Name: 'Unauthenticated' },
+                                              { Id: 722_310_001, Name: 'Personal' },
+                                              { Id: 722_310_003, Name: 'Business' }] },
+          'suffix' => { Data: [{ Id: 722_310_000, Name: 'Jr' },
+                               { Id: 722_310_001, Name: 'Sr' },
+                               { Id: 722_310_003, Name: 'II' },
+                               { Id: 722_310_004, Name: 'III' },
+                               { Id: 722_310_006, Name: 'IV' },
+                               { Id: 722_310_002, Name: 'V' },
+                               { Id: 722_310_005, Name: 'VI' }] },
+          'veteranrelationship' => { Data: [{ Id: 722_310_007, Name: 'Child' },
+                                            { Id: 722_310_008, Name: 'Guardian' },
+                                            { Id: 722_310_005, Name: 'Parent' },
+                                            { Id: 722_310_012, Name: 'Sibling' },
+                                            { Id: 722_310_015, Name: 'Spouse/Surviving Spouse' },
+                                            { Id: 722_310_004, Name: 'Ex-spouse' },
+                                            { Id: 722_310_010, Name: 'GI Bill Beneficiary' },
+                                            { Id: 722_310_018, Name: 'Other (Personal)' },
+                                            { Id: 722_310_000, Name: 'Attorney' },
+                                            { Id: 722_310_001, Name: 'Authorized 3rd Party' },
+                                            { Id: 722_310_020, Name: 'Fiduciary' },
+                                            { Id: 722_310_006, Name: 'Funeral Director' },
+                                            { Id: 722_310_016, Name: 'OJT/Apprenticeship Supervisor' },
+                                            { Id: 722_310_013, Name: 'School Certifying Official' },
+                                            { Id: 722_310_019, Name: 'VA Employee' },
+                                            { Id: 722_310_017, Name: 'VSO' },
+                                            { Id: 722_310_014, Name: 'Work Study Site Supervisor' },
+                                            { Id: 722_310_011, Name: 'Other (Business)' },
+                                            { Id: 722_310_002, Name: 'School Official (DO NOT USE)' },
+                                            { Id: 722_310_009, Name: 'Helpless Child' },
+                                            { Id: 722_310_003, Name: 'Dependent Child' }] },
+          'dependentrelationship' => { Data: [{ Id: 722_310_006, Name: 'Child' },
+                                              { Id: 722_310_009, Name: 'Parent' },
+                                              { Id: 722_310_008, Name: 'Spouse' },
+                                              { Id: 722_310_010, Name: 'Stepchild' },
+                                              { Id: 722_310_005, Name: 'Other' }] },
+          'responsetype' => { Data: [{ Id: 722_310_000, Name: 'Email' }, { Id: 722_310_001, Name: 'Phone' },
+                                     { Id: 722_310_002, Name: 'US Mail' }] }
+        }[option]
       end
     end
 
-    context 'when the API call fails' do
-      let(:body) do
-        '{"Data":null,"Message":"Data Validation: missing InquiryCategory"' \
-          ',"ExceptionOccurred":true,"ExceptionMessage":"Data Validation: missing' \
-          'InquiryCategory","MessageId":"cb0dd954-ef25-4e56-b0d9-41925e5a190c"}'
-      end
-      let(:failure) { Faraday::Response.new(response_body: body, status: 400) }
+    before do
+      allow(Crm::CacheData).to receive(:new).and_return(cache_data_service)
 
-      before do
-        allow(service).to receive(:call).and_return(failure)
+      option_keys.each do |option|
+        allow(cache_data_service).to receive(:call).with(
+          endpoint: 'optionset',
+          cache_key: option,
+          payload: { name: "iris_#{option}" }
+        ).and_return(cache_data.call(option))
       end
+    end
 
-      it 'raise InquiriesCreatorError' do
-        expect { creator.call(inquiry_params:) }.to raise_error(ErrorHandler::ServiceError)
-      end
+    it 'translates the keys from snake_case to camel_case' do
+      expect(result.keys).to eq(converted_payload.keys)
+    end
+
+    it 'translates all the option keys from name to id' do
+      expect(result[:InquiryAbout]).to eq(converted_payload[:InquiryAbout])
+      expect(result[:InquirySource]).to eq(converted_payload[:InquirySource])
+      expect(result[:InquiryType]).to eq(converted_payload[:InquiryType])
+      expect(result[:LevelOfAuthentication]).to eq(converted_payload[:LevelOfAuthentication])
+      expect(result[:Suffix]).to eq(converted_payload[:Suffix])
+      expect(result[:VeteranRelationship]).to eq(converted_payload[:VeteranRelationship])
+      expect(result[:DependantRelationship]).to eq(converted_payload[:DependantRelationship])
+      expect(result[:ResponseType]).to eq(converted_payload[:ResponseType])
+    end
+
+    it 'translates inquiry_params to converted payload' do
+      expect(result).to eq(converted_payload)
+    end
+  end
+
+  context 'when an error occurs' do
+    let(:body) do
+      '{"Data":null,"Message":"Data Validation: Invalid OptionSet Name iris_inquiryabou, valid' \
+        ' values are iris_inquiryabout, iris_inquirysource, iris_inquirytype, iris_levelofauthentication,' \
+        ' iris_suffix, iris_veteranrelationship, iris_branchofservice, iris_country, iris_province,' \
+        ' iris_responsetype, iris_dependentrelationship, statuscode, iris_messagetype","ExceptionOccurred":' \
+        'true,"ExceptionMessage":"Data Validation: Invalid OptionSet Name iris_branchofservic, valid' \
+        ' values are iris_inquiryabout, iris_inquirysource, iris_inquirytype, iris_levelofauthentication,' \
+        ' iris_suffix, iris_veteranrelationship, iris_branchofservice, iris_country, iris_province,' \
+        ' iris_responsetype, iris_dependentrelationship, statuscode, iris_messagetype","MessageId":' \
+        '"6dfa81bd-f04a-4f39-88c5-1422d88ed3ff"}'
+    end
+    let(:failure) { Faraday::Response.new(response_body: body, status: 400) }
+
+    before do
+      allow_any_instance_of(Crm::CrmToken).to receive(:call).and_return('token')
+      allow_any_instance_of(Crm::Service).to receive(:call)
+        .with(endpoint: 'optionset', payload: { name: 'iris_inquiryabout' }).and_return(failure)
+    end
+
+    it 'log to Datadog, when updating option fails' do
+      expect { result }.to raise_error(AskVAApi::TranslatorError)
     end
   end
 end
