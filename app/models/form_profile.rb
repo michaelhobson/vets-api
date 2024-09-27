@@ -287,7 +287,7 @@ class FormProfile
       Rails.logger.info("User VAProfile Contact Info, Vet360ID? #{user.vet360_id.present?}, Address? #{opt[:address].present?}
         Email? #{opt[:email].present?}, Phone? #{opt[:home_phone].present?}")
     else
-      Rails.logger.info("User Vet360 Contact Info, Vet360ID? #{user.vet360_id.present?}, Address? #{opt[:address].present?}
+      Rails.logger.info("User Vet360 Contact Info, Vet360ID? #{user.vet360_id.present?},Address? #{opt[:address].present?}
         Email? #{opt[:email].present?}, Phone? #{opt[:home_phone].present?}")
     end
 
@@ -350,6 +350,10 @@ class FormProfile
     user&.send(method)
   rescue Common::Exceptions::Forbidden, Common::Exceptions::BackendServiceException, EVSS::ErrorMiddleware::EVSSError
     ''
+  end
+
+  def va_profile_phone
+    vet360_contact_info&.home_phone&.formatted_phone
   end
 
   def pciu_us_phone

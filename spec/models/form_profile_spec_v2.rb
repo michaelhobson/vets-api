@@ -8,23 +8,23 @@ require 'gi/client'
 RSpec.describe FormProfile, type: :model do
   include SchemaMatchers
 
-  let(:user) { build(:user, :loa3, suffix: 'Jr.', address: build(:mpi_profile_address)) }
+  let(:user) { build(:user, :loa3, suffix: 'Jr.', address: build(:va_profile_address_v2), vet360_id: '1781151') }
 
   before do
-    Flipper.disable(:remove_pciu)
-    stub_evss_pciu(user)
+    Flipper.enable(:remove_pciu)
+    Flipper.enable(:va_v3_contact_information_service)
     described_class.instance_variable_set(:@mappings, nil)
     Flipper.disable(:disability_526_toxic_exposure)
     Flipper.disable(ApiProviderFactory::FEATURE_TOGGLE_PPIU_DIRECT_DEPOSIT)
   end
 
-  let(:street_check) { build(:street_check) }
+  let(:street_check) { build(:va_profile_street_check) }
 
   let(:form_profile) do
     described_class.new(form_id: 'foo', user:)
   end
 
-  let(:us_phone) { form_profile.send :pciu_us_phone }
+  let(:us_phone) { form_profile.send :va_profile_phone }
 
   let(:full_name) do
     {
@@ -59,7 +59,7 @@ RSpec.describe FormProfile, type: :model do
       'city' => user.address[:city],
       'state' => user.address[:state],
       'country' => user.address[:country],
-      'postal_code' => user.address[:postal_code].slice(0, 5)
+      'postal_code' => user.address[:zip_code].slice(0, 5)
     }
   end
 
@@ -102,7 +102,7 @@ RSpec.describe FormProfile, type: :model do
           'dateOfBirth' => user.birth_date,
           'name' => full_name,
           'ssn' => FormIdentityInformation.new(ssn: user.ssn).hyphenated_ssn,
-          'email' => user.pciu_email,
+          'email' => user.va_profile_email,
           'phoneNumber' => us_phone
         }
       }
@@ -122,7 +122,7 @@ RSpec.describe FormProfile, type: :model do
         'serviceNumber' => '123455678'
       },
       'contactInformation' => {
-        'email' => user.pciu_email,
+        'email' => user.va_profile_email,
         'phone' => us_phone,
         'address' => address
       },
@@ -148,8 +148,8 @@ RSpec.describe FormProfile, type: :model do
           'stateCode' => 'DC',
           'zipCode' => '20011'
         },
-        'phoneNumber' => '4445551212',
-        'emailAddress' => 'test2@test1.net'
+        'phoneNumber' => '3035551234',
+        'emailAddress' => 'person101@example.com'
       },
       'veteranInformation' => {
         'fullName' => {
@@ -310,7 +310,7 @@ RSpec.describe FormProfile, type: :model do
         'city' => user.address[:city],
         'state' => user.address[:state],
         'country' => user.address[:country],
-        'postal_code' => user.address[:postal_code][0..4]
+        'postal_code' => user.address[:zip_code]
       },
       'veteranFullName' => {
         'first' => user.first_name&.capitalize,
@@ -322,7 +322,7 @@ RSpec.describe FormProfile, type: :model do
       'homePhone' => us_phone,
       'veteranDateOfBirth' => user.birth_date,
       'veteranSocialSecurityNumber' => user.ssn,
-      'email' => user.pciu_email
+      'email' => user.va_profile_email
     }
   end
 
@@ -347,7 +347,7 @@ RSpec.describe FormProfile, type: :model do
         'city' => user.address[:city],
         'state' => user.address[:state],
         'country' => user.address[:country],
-        'postal_code' => user.address[:postal_code][0..4]
+        'postal_code' => user.address[:zip_code]
       },
       'applicantFullName' => {
         'first' => user.first_name&.capitalize,
@@ -359,7 +359,7 @@ RSpec.describe FormProfile, type: :model do
       'dayTimePhone' => us_phone,
       'dateOfBirth' => user.birth_date,
       'applicantSocialSecurityNumber' => user.ssn,
-      'emailAddress' => user.pciu_email
+      'emailAddress' => user.va_profile_email
     }
   end
 
@@ -375,7 +375,7 @@ RSpec.describe FormProfile, type: :model do
         'city' => user.address[:city],
         'state' => user.address[:state],
         'country' => user.address[:country],
-        'postal_code' => user.address[:postal_code][0..4]
+        'postal_code' => user.address[:zip_code]
       },
       'veteranFullName' => {
         'first' => user.first_name&.capitalize,
@@ -387,7 +387,7 @@ RSpec.describe FormProfile, type: :model do
       'homePhone' => us_phone,
       'veteranDateOfBirth' => user.birth_date,
       'veteranSocialSecurityNumber' => user.ssn,
-      'email' => user.pciu_email
+      'email' => user.va_profile_email
     }
   end
 
@@ -399,7 +399,7 @@ RSpec.describe FormProfile, type: :model do
         'city' => user.address[:city],
         'state' => user.address[:state],
         'country' => user.address[:country],
-        'postal_code' => user.address[:postal_code][0..4]
+        'postal_code' => user.address[:zip_code]
       },
       'relativeFullName' => {
         'first' => user.first_name&.capitalize,
@@ -419,7 +419,7 @@ RSpec.describe FormProfile, type: :model do
         'city' => user.address[:city],
         'state' => user.address[:state],
         'country' => user.address[:country],
-        'postal_code' => user.address[:postal_code][0..4]
+        'postal_code' => user.address[:zip_code]
       },
       'veteranFullName' => {
         'first' => user.first_name&.capitalize,
@@ -429,7 +429,7 @@ RSpec.describe FormProfile, type: :model do
       },
       'homePhone' => us_phone,
       'veteranSocialSecurityNumber' => user.ssn,
-      'email' => user.pciu_email
+      'email' => user.va_profile_email
     }
   end
 
@@ -441,7 +441,7 @@ RSpec.describe FormProfile, type: :model do
         'city' => user.address[:city],
         'state' => user.address[:state],
         'country' => user.address[:country],
-        'postal_code' => user.address[:postal_code][0..4]
+        'postal_code' => user.address[:zip_code]
       },
       'veteranFullName' => {
         'first' => user.first_name&.capitalize,
@@ -451,7 +451,7 @@ RSpec.describe FormProfile, type: :model do
       },
       'homePhone' => us_phone,
       'veteranSocialSecurityNumber' => user.ssn,
-      'email' => user.pciu_email
+      'email' => user.va_profile_email
     }
   end
 
@@ -463,7 +463,7 @@ RSpec.describe FormProfile, type: :model do
         'city' => user.address[:city],
         'state' => user.address[:state],
         'country' => user.address[:country],
-        'postal_code' => user.address[:postal_code][0..4]
+        'postal_code' => user.address[:zip_code]
       },
       'veteranFullName' => {
         'first' => user.first_name&.capitalize,
@@ -473,7 +473,7 @@ RSpec.describe FormProfile, type: :model do
       },
       'homePhone' => us_phone,
       'veteranSocialSecurityNumber' => user.ssn,
-      'email' => user.pciu_email
+      'email' => user.va_profile_email
     }
   end
 
@@ -516,14 +516,14 @@ RSpec.describe FormProfile, type: :model do
         'suffix' => user.suffix
       },
       'veteranDateOfBirth' => user.birth_date,
-      'email' => user.pciu_email,
+      'email' => user.va_profile_email,
       'veteranAddress' => {
         'street' => street_check[:street],
         'street2' => street_check[:street2],
         'city' => user.address[:city],
         'state' => user.address[:state],
         'country' => user.address[:country],
-        'postal_code' => user.address[:postal_code][0..4]
+        'postal_code' => user.address[:zip_code]
       },
       'swAsiaCombat' => false,
       'lastServiceBranch' => 'army',
@@ -640,7 +640,7 @@ RSpec.describe FormProfile, type: :model do
         'veteranFullName' => full_name,
         'address' => address,
         'telephoneNumber' => us_phone,
-        'emailAddress' => user.pciu_email,
+        'emailAddress' => user.va_profile_email,
         'dateOfBirth' => user.birth_date
       },
       'income' => [
@@ -654,7 +654,7 @@ RSpec.describe FormProfile, type: :model do
 
   let(:vvic_expected) do
     {
-      'email' => user.pciu_email,
+      'email' => user.va_profile_email,
       'serviceBranches' => ['F'],
       'gender' => user.gender,
       'verified' => true,
@@ -678,7 +678,7 @@ RSpec.describe FormProfile, type: :model do
         'city' => user.address[:city],
         'state' => user.address[:state],
         'country' => user.address[:country],
-        'postal_code' => user.address[:postal_code][0..4]
+        'postal_code' => user.address[:zip_code]
       },
       'veteranSocialSecurityNumber' => user.ssn,
       'veteranDateOfBirth' => user.birth_date
@@ -699,7 +699,7 @@ RSpec.describe FormProfile, type: :model do
         'city' => user.address[:city],
         'state' => user.address[:state],
         'country' => user.address[:country],
-        'postal_code' => user.address[:postal_code][0..4]
+        'postal_code' => user.address[:zip_code]
       },
       'email' => 'test2@test1.net',
       'phone' => '4445551212',
@@ -732,10 +732,10 @@ RSpec.describe FormProfile, type: :model do
         'city' => user.address[:city],
         'state' => user.address[:state],
         'country' => 'US',
-        'postal_code' => user.address[:postal_code][0..4]
+        'postal_code' => user.address[:zip_code]
       },
       'claimantPhone' => us_phone,
-      'claimantEmail' => user.pciu_email
+      'claimantEmail' => user.va_profile_email
     }
   end
 
@@ -816,7 +816,7 @@ RSpec.describe FormProfile, type: :model do
         'city' => user.address[:city],
         'state' => user.address[:state],
         'country' => 'US',
-        'postal_code' => user.address[:postal_code][0..4]
+        'postal_code' => user.address[:zip_code]
       },
       'serviceBranch' => 'Army',
       'fullName' => {
@@ -825,7 +825,7 @@ RSpec.describe FormProfile, type: :model do
         'last' => user.last_name&.capitalize,
         'suffix' => user.suffix
       },
-      'applicantEmail' => user.pciu_email,
+      'applicantEmail' => user.va_profile_email,
       'phone' => us_phone,
       'serviceDateRange' => {
         'from' => '2002-07-02',
@@ -849,10 +849,10 @@ RSpec.describe FormProfile, type: :model do
         'city' => user.address[:city],
         'state' => user.address[:state],
         'country' => user.address[:country],
-        'postal_code' => user.address[:postal_code][0..4]
+        'postal_code' => user.address[:zip_code]
       },
       'contactPhone' => us_phone,
-      'contactEmail' => user.pciu_email,
+      'contactEmail' => user.va_profile_email,
       'periodsOfService' => tours_of_duty,
       'currentlyActiveDuty' => {
         'yes' => false
@@ -869,10 +869,10 @@ RSpec.describe FormProfile, type: :model do
         'city' => user.address[:city],
         'state' => user.address[:state],
         'country' => user.address[:country],
-        'postal_code' => user.address[:postal_code][0..4]
+        'postal_code' => user.address[:zip_code]
       },
       'claimantPhoneNumber' => us_phone,
-      'claimantEmailAddress' => user.pciu_email
+      'claimantEmailAddress' => user.va_profile_email
     }
   end
 
@@ -894,14 +894,14 @@ RSpec.describe FormProfile, type: :model do
               'city' => user.address[:city],
               'stateCode' => user.address[:state],
               'countryName' => user.address[:country],
-              'zipCode5' => user.address[:postal_code][0..4]
+              'zipCode5' => user.address[:zip_code]
             },
             'phone' => {
               'areaCode' => us_phone[0..2],
               'phoneNumber' => us_phone[3..9]
             },
             'homePhone' => '14445551212',
-            'emailAddressText' => user.pciu_email,
+            'emailAddressText' => user.va_profile_email,
             'lastServiceBranch' => 'Army'
           }
         }
@@ -926,10 +926,10 @@ RSpec.describe FormProfile, type: :model do
         'city' => user.address[:city],
         'state' => user.address[:state],
         'country' => user.address[:country],
-        'postal_code' => user.address[:postal_code][0..4]
+        'postal_code' => user.address[:zip_code]
       },
       'mainPhone' => us_phone,
-      'email' => user.pciu_email
+      'email' => user.va_profile_email
     }
   end
 
@@ -945,14 +945,14 @@ RSpec.describe FormProfile, type: :model do
         'dateOfBirth' => '1809-02-12'
       },
       'contactInformation' => {
-        'email' => user.pciu_email,
+        'email' => user.va_profile_email,
         'address' => {
           'street' => street_check[:street],
           'street2' => street_check[:street2],
           'city' => user.address[:city],
           'state' => user.address[:state],
           'country' => user.address[:country],
-          'postal_code' => user.address[:postal_code][0..4]
+          'postal_code' => user.address[:zip_code]
         },
         'primaryPhone' => '4445551212'
       },
@@ -982,14 +982,14 @@ RSpec.describe FormProfile, type: :model do
         'dateOfBirth' => '1809-02-12'
       },
       'contactInformation' => {
-        'email' => user.pciu_email,
+        'email' => user.va_profile_email,
         'address' => {
           'street' => street_check[:street],
           'street2' => street_check[:street2],
           'city' => user.address[:city],
           'state' => user.address[:state],
           'country' => user.address[:country],
-          'postal_code' => user.address[:postal_code][0..4]
+          'postal_code' => user.address[:zip_code]
         },
         'primaryPhone' => '4445551212'
       },
@@ -1018,14 +1018,14 @@ RSpec.describe FormProfile, type: :model do
         'ssn' => '796111863',
         'dateOfBirth' => '1809-02-12',
         'homePhone' => '14445551212',
-        'email' => user.pciu_email,
+        'email' => user.va_profile_email,
         'address' => {
           'street' => street_check[:street],
           'street2' => street_check[:street2],
           'city' => user.address[:city],
           'state' => user.address[:state],
           'country' => user.address[:country],
-          'postal_code' => user.address[:postal_code][0..4]
+          'postal_code' => user.address[:zip_code]
         }
       }
     }
@@ -1042,14 +1042,14 @@ RSpec.describe FormProfile, type: :model do
         'ssn' => '796111863',
         'dateOfBirth' => '1809-02-12',
         'homePhone' => '14445551212',
-        'email' => user.pciu_email,
+        'email' => user.va_profile_email,
         'address' => {
           'street' => street_check[:street],
           'street2' => street_check[:street2],
           'city' => user.address[:city],
           'state' => user.address[:state],
           'country' => user.address[:country],
-          'postal_code' => user.address[:postal_code][0..4]
+          'postal_code' => user.address[:zip_code]
         }
       }
     }
@@ -1142,7 +1142,7 @@ RSpec.describe FormProfile, type: :model do
     }
   end
 
-  describe '#initialize_military_information', :skip_va_profile do
+  describe '#initialize_military_information', :initiate_vaprofile do
     context 'with military_information vaprofile' do
       it 'prefills military data from va profile' do
         VCR.use_cassette('va_profile/military_personnel/post_read_service_histories_200',
@@ -1177,7 +1177,7 @@ RSpec.describe FormProfile, type: :model do
     end
   end
 
-  describe '#initialize_va_profile_prefill_military_information' do
+  describe '#initialize_va_profile_prefill_military_information', :initiate_vaprofile do
     context 'when va profile is down in production' do
       it 'logs exception and returns empty hash' do
         expect(form_profile).to receive(:log_exception_to_sentry).with(
@@ -1208,40 +1208,7 @@ RSpec.describe FormProfile, type: :model do
     end
   end
 
-  describe '#pciu_us_phone' do
-    def self.test_pciu_us_phone(primary, expected)
-      it "returns #{expected}" do
-        allow_any_instance_of(FormProfile).to receive(:pciu_primary_phone).and_return(primary)
-        expect(form_profile.send(:pciu_us_phone)).to eq(expected)
-      end
-    end
-
-    context 'with nil' do
-      test_pciu_us_phone(nil, '')
-    end
-
-    context 'with an intl phone number' do
-      test_pciu_us_phone('442079460976', '')
-    end
-
-    context 'with a us phone number' do
-      test_pciu_us_phone('5557940976', '5557940976')
-    end
-
-    context 'with a us 1+ phone number' do
-      test_pciu_us_phone('15557940976', '5557940976')
-    end
-  end
-
-  describe '#extract_pciu_data' do
-    it 'rescues EVSS::ErrorMiddleware::EVSSError errors' do
-      expect(user).to receive(:pciu_primary_phone).and_raise(EVSS::ErrorMiddleware::EVSSError)
-
-      expect(form_profile.send(:extract_pciu_data, :pciu_primary_phone)).to eq('')
-    end
-  end
-
-  describe '#prefill_form' do
+  describe '#prefill_form', :initiate_vaprofile do
     def can_prefill_vaprofile(yes)
       expect(user).to receive(:authorize).at_least(:once).with(:va_profile, :access?).and_return(yes)
     end
@@ -1308,9 +1275,9 @@ RSpec.describe FormProfile, type: :model do
               'city' => user.address[:city],
               'state' => user.address[:state],
               'country' => user.address[:country],
-              'postal_code' => user.address[:postal_code][0..4]
+              'postal_code' => user.address[:zip_code]
             },
-            'email' => user.pciu_email
+            'email' => user.va_profile_email
           }
         end
 
@@ -1341,9 +1308,9 @@ RSpec.describe FormProfile, type: :model do
               'city' => user.address[:city],
               'state' => user.address[:state],
               'country' => user.address[:country],
-              'postal_code' => user.address[:postal_code][0..4]
+              'postal_code' => user.address[:zip_code]
             },
-            'email' => user.pciu_email,
+            'email' => user.va_profile_email,
             'spouseSocialSecurityNumber' => '435345344',
             'spouseDateOfBirth' => '1950-02-17',
             'dateOfMarriage' => '2000-10-15',
@@ -1391,9 +1358,9 @@ RSpec.describe FormProfile, type: :model do
               'city' => user.address[:city],
               'state' => user.address[:state],
               'country' => user.address[:country],
-              'postal_code' => user.address[:postal_code][0..4]
+              'postal_code' => user.address[:zip_code]
             },
-            'email' => user.pciu_email,
+            'email' => user.va_profile_email,
             'maritalStatus' => 'Married',
             'isMedicaidEligible' => true,
             'isEnrolledMedicarePartA' => true,
@@ -1424,7 +1391,7 @@ RSpec.describe FormProfile, type: :model do
         expect(user.authorize(:mdot, :access?)).to eq(true)
       end
 
-      it 'returns a prefilled MDOT form', :skip_va_profile do
+      it 'returns a prefilled MDOT form', :initiate_vaprofile do
         VCR.use_cassette('mdot/get_supplies_200') do
           expect_prefilled('MDOT')
         end
@@ -1488,7 +1455,7 @@ RSpec.describe FormProfile, type: :model do
                 'veteranFullName' => full_name,
                 'address' => address,
                 'telephoneNumber' => us_phone,
-                'emailAddress' => user.pciu_email,
+                'emailAddress' => user.va_profile_email,
                 'dateOfBirth' => user.birth_date
               },
               'income' => [
@@ -1510,7 +1477,7 @@ RSpec.describe FormProfile, type: :model do
       end
     end
 
-    context 'when VA Profile returns 404', :skip_va_profile do
+    context 'when VA Profile returns 404', :initiate_vaprofile do
       it 'returns default values' do
         VCR.use_cassette('va_profile/military_personnel/post_read_service_history_404',
                          allow_playback_repeats: true, match_requests_on: %i[method body]) do
@@ -1535,7 +1502,7 @@ RSpec.describe FormProfile, type: :model do
       end
     end
 
-    context 'when VA Profile returns 500', :skip_va_profile do
+    context 'when VA Profile returns 500', :initiate_vaprofile do
       it 'sends a BackendServiceException to Sentry and returns and empty hash' do
         VCR.use_cassette('va_profile/military_personnel/post_read_service_history_500',
                          allow_playback_repeats: true, match_requests_on: %i[method uri]) do
@@ -1562,12 +1529,12 @@ RSpec.describe FormProfile, type: :model do
       end
     end
 
-    context 'with military information data', :skip_va_profile do
+    context 'with military information data', :initiate_vaprofile do
       context 'with va profile prefill on' do
         before do
           VAProfile::Configuration::SETTINGS.prefill = true
 
-          v22_1990_expected['email'] = VAProfileRedis::ContactInformation.for_user(user).email.email_address
+          v22_1990_expected['email'] = VAProfileRedis::V2::ContactInformation.for_user(user).email.email_address
           v22_1990_expected['homePhone'] = '3035551234'
           v22_1990_expected['mobilePhone'] = '3035551234'
           v22_1990_expected['veteranAddress'] = {
@@ -1593,8 +1560,6 @@ RSpec.describe FormProfile, type: :model do
 
       context 'with VA Profile prefill for 0994' do
         before do
-          expect(user).to receive(:authorize).with(:ppiu, :access?).and_return(true).at_least(:once)
-          expect(user).to receive(:authorize).with(:evss, :access?).and_return(true).at_least(:once)
           expect(user).to receive(:authorize).with(:va_profile, :access?).and_return(true).at_least(:once)
         end
 
@@ -1609,8 +1574,7 @@ RSpec.describe FormProfile, type: :model do
       context 'with VA Profile and ppiu prefill for 0994' do
         before do
           can_prefill_vaprofile(true)
-          expect(user).to receive(:authorize).with(:ppiu, :access?).and_return(true).at_least(:once)
-          expect(user).to receive(:authorize).with(:evss, :access?).and_return(true).at_least(:once)
+          expect(user).to receive(:authorize).with(:va_profile, :access?).and_return(true).at_least(:once)
           v22_0994_expected['bankAccount'] = {
             'bankAccountNumber' => '*********1234',
             'bankAccountType' => 'Checking',
@@ -1620,7 +1584,7 @@ RSpec.describe FormProfile, type: :model do
         end
 
         it 'prefills 0994 with VA Profile and payment information' do
-          VCR.use_cassette('evss/pciu_address/address_domestic') do
+          VCR.use_cassette('va_profile/v2/contact_information/get_address') do
             VCR.use_cassette('evss/disability_compensation_form/rated_disabilities') do
               VCR.use_cassette('evss/ppiu/payment_information') do
                 VCR.use_cassette('va_profile/military_personnel/post_read_service_histories_200',
@@ -1676,7 +1640,7 @@ RSpec.describe FormProfile, type: :model do
       context 'with VA Profile prefill for 10203' do
         before do
           can_prefill_vaprofile(true)
-          expect(user).to receive(:authorize).with(:evss, :access?).and_return(true).at_least(:once)
+          expect(user).to receive(:authorize).with(:va_profile, :access?).and_return(true).at_least(:once)
         end
 
         it 'prefills 10203' do
@@ -1702,7 +1666,7 @@ RSpec.describe FormProfile, type: :model do
         end
 
         it 'prefills 10203 with VA Profile and entitlement information' do
-          VCR.use_cassette('evss/pciu_address/address_domestic') do
+          VCR.use_cassette('va_profile/v2/contact_information/get_address') do
             VCR.use_cassette('evss/disability_compensation_form/rated_disabilities') do
               VCR.use_cassette('form_10203/gi_bill_status_200_response') do
                 VCR.use_cassette('gi_client/gets_the_institution_details') do
@@ -1714,6 +1678,7 @@ RSpec.describe FormProfile, type: :model do
                       described_class.for(form_id: '22-10203', user:).prefill.to_json
                     )['form_data']
                     actual = form_profile.send(:clean!, v22_10203_expected)
+                    binding.pry
                     expect(prefilled_data).to eq(actual)
                   end
                 end
@@ -1738,7 +1703,8 @@ RSpec.describe FormProfile, type: :model do
                              allow_playback_repeats: true) do
               prefilled_data = described_class.for(form_id: '686C-674', user:).prefill[:form_data]
               v686_c_674_expected['veteranContactInformation'].delete('veteranAddress')
-              expect(prefilled_data).to eq(v686_c_674_expected)
+              expect(prefilled_data['veteranInformation']).to eq(v686_c_674_expected['veteranInformation'])
+              expect(prefilled_data['veteranContactInformation']).to eq(v686_c_674_expected['veteranContactInformation'])
             end
           end
         end
@@ -1804,15 +1770,15 @@ RSpec.describe FormProfile, type: :model do
           # NOTE: `increase only` and `all claims` use the same form prefilling
           context 'when Vet360 prefill is disabled' do
             before do
-              expect(user).to receive(:authorize).with(:ppiu, :access?).and_return(true).at_least(:once)
-              expect(user).to receive(:authorize).with(:evss, :access?).and_return(true).at_least(:once)
+
+              expect(user).to receive(:authorize).with(:va_profile, :access?).and_return(true).at_least(:once)
             end
 
             it 'returns prefilled 21-526EZ' do
               Flipper.disable(ApiProviderFactory::FEATURE_TOGGLE_RATED_DISABILITIES_FOREGROUND)
-              Flipper.disable(:disability_compensation_remove_pciu)
+              Flipper.enable(:disability_compensation_remove_pciu)
               Flipper.enable(:disability_526_toxic_exposure, user)
-              VCR.use_cassette('evss/pciu_address/address_domestic') do
+              VCR.use_cassettes('va_profile/v2/contact_information/get_address') do
                 VCR.use_cassette('evss/disability_compensation_form/rated_disabilities') do
                   VCR.use_cassette('evss/ppiu/payment_information') do
                     VCR.use_cassette('va_profile/military_personnel/service_history_200_many_episodes',
@@ -1834,7 +1800,7 @@ RSpec.describe FormProfile, type: :model do
               VAProfile::Configuration::SETTINGS.prefill = true # TODO: - is this missing in the failures above?
               expected_veteran_info = v21_526_ez_expected['veteran']
               expected_veteran_info['emailAddress'] =
-                VAProfileRedis::ContactInformation.for_user(user).email.email_address
+                VAProfileRedis::V2::ContactInformation.for_user(user).email.email_address
               expected_veteran_info['primaryPhone'] = '3035551234'
             end
 
@@ -1845,9 +1811,9 @@ RSpec.describe FormProfile, type: :model do
             it 'returns prefilled 21-526EZ' do
               Flipper.disable(ApiProviderFactory::FEATURE_TOGGLE_RATED_DISABILITIES_FOREGROUND)
               Flipper.enable(:disability_526_toxic_exposure, user)
-              expect(user).to receive(:authorize).with(:ppiu, :access?).and_return(true).at_least(:once)
-              expect(user).to receive(:authorize).with(:evss, :access?).and_return(true).at_least(:once)
-              VCR.use_cassette('evss/pciu_address/address_domestic') do
+
+              expect(user).to receive(:authorize).with(:va_profile, :access?).and_return(true).at_least(:once)
+              VCR.use_cassettes('va_profile/v2/contact_information/get_address') do
                 VCR.use_cassette('evss/disability_compensation_form/rated_disabilities') do
                   VCR.use_cassette('evss/ppiu/payment_information') do
                     VCR.use_cassette('va_profile/military_personnel/service_history_200_many_episodes',
@@ -1863,7 +1829,7 @@ RSpec.describe FormProfile, type: :model do
           end
 
           it 'returns prefilled 21-686C' do
-            expect(user).to receive(:authorize).with(:evss, :access?).and_return(true).at_least(:once)
+            expect(user).to receive(:authorize).with(:va_profile, :access?).and_return(true).at_least(:once)
             VCR.use_cassette('evss/dependents/retrieve_user_with_max_attributes') do
               VCR.use_cassette('va_profile/military_personnel/post_read_service_histories_200',
                                allow_playback_repeats: true) do
@@ -2021,7 +1987,7 @@ RSpec.describe FormProfile, type: :model do
     end
   end
 
-  describe '.mappings_for_form' do
+  describe '.mappings_for_form', :initiate_vaprofile do
     context 'with multiple form profile instances' do
       let(:instance1) { FormProfile.new(form_id: '1010ez', user:) }
       let(:instance2) { FormProfile.new(form_id: '1010ez', user:) }
@@ -2038,5 +2004,41 @@ RSpec.describe FormProfile, type: :model do
         instance2.prefill
       end
     end
+  end
+
+  describe 'vaprofile contact information v2', :initiate_vaprofile do
+    before do
+      Flipper.enable(:remove_pciu, user)
+    end
+    after do
+      Flipper.disable(:remove_pciu, user)
+    end
+    context 'with va profile prefill on' do
+      before do
+        VAProfile::Configuration::SETTINGS.prefill = true
+        v22_1990_expected['email'] = VAProfileRedis::V2::ContactInformation.for_user(user).email.email_address
+        v22_1990_expected['homePhone'] = '3035551234'
+        v22_1990_expected['mobilePhone'] = '3035551234'
+        v22_1990_expected['veteranAddress'] = {
+          'street' => '140 Rock Creek Rd',
+          'city' => 'Washington',
+          'state' => 'DC',
+          'country' => 'USA',
+          'postalCode' => '20011'
+        }
+      end
+
+      after do
+        VAProfile::Configuration::SETTINGS.prefill = false
+      end
+
+      it 'prefills 1990' do
+        VCR.use_cassette('va_profile/military_personnel/service_history_200_many_episodes',
+                         allow_playback_repeats: true, match_requests_on: %i[uri method body]) do
+          expect_prefilled('22-1990')
+        end
+      end
+    end
+
   end
 end
