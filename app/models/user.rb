@@ -205,12 +205,12 @@ class User < Common::RedisStore
   def address
     address = mpi_profile&.address || {}
     {
-      street: address[:street],
-      street2: address[:street2],
+      street: address[:street] || address[:address_line1],
+      street2: address[:street2] || address[:address_line2],
       city: address[:city],
-      state: address[:state],
-      country: address[:country],
-      postal_code: address[:postal_code]
+      state: address[:state] || address[:state_code],
+      country: address[:country] || address[:country_code_iso3],
+      postal_code: address[:postal_code] || address[:zip_code]
     }
   end
 
@@ -411,6 +411,16 @@ class User < Common::RedisStore
   # Created for spec testing V2
   def va_profile_v2_email
     vaprofile_contact_info&.email&.email_address
+  end
+
+  def va_profile_phone
+    home = vaprofile_contact_info&.home_phone
+    return home.area_code + home.phone_number
+  end
+
+  def va_profile_mobile_phone
+    mobile = vaprofile_contact_info&.mobile_phone
+    return mobile.area_code + mobile.phone_number
   end
 
   def all_emails

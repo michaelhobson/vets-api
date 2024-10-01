@@ -290,7 +290,6 @@ class FormProfile
       Rails.logger.info("User Vet360 Contact Info, Vet360ID? #{user.vet360_id.present?},Address? #{opt[:address].present?}
         Email? #{opt[:email].present?}, Phone? #{opt[:home_phone].present?}")
     end
-
     opt[:address] ||= user_address_hash
     opt[:email] ||= extract_pciu_data(:pciu_email)
     if opt[:home_phone].nil?
@@ -299,7 +298,7 @@ class FormProfile
     end
 
     format_for_schema_compatibility(opt)
-
+    binding.pry
     FormContactInformation.new(opt)
   end
 
@@ -338,7 +337,6 @@ class FormProfile
       opt[:address][:street2] = apt[1]
       opt[:address][:street] = opt[:address][:street].gsub(/\W?\s+#{apt[1]}/, '').strip
     end
-
     %i[home_phone us_phone mobile_phone].each do |phone|
       opt[phone] = opt[phone].gsub(/\D/, '') if opt[phone]
     end
@@ -353,7 +351,13 @@ class FormProfile
   end
 
   def va_profile_phone
-    vet360_contact_info&.home_phone&.formatted_phone
+    home = vet360_contact_info&.home_phone
+    return home.area_code + home.phone_number
+  end
+
+  def va_profile_mobile_phone
+    mobile = vet360_contact_info&.mobile_phone
+    return mobile.area_code + mobile.phone_number
   end
 
   def pciu_us_phone

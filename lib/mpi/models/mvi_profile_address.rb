@@ -11,6 +11,11 @@ module MPI
       attribute :state, String
       attribute :postal_code, String
       attribute :country, String
+      attribute :country_code_iso3, String
+      attribute :zip_code, String
+      attribute :state_code, String
+      attribute :address_line1, String
+      attribute :address_line2, String
     end
   end
 end
