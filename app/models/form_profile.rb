@@ -298,7 +298,6 @@ class FormProfile
     end
 
     format_for_schema_compatibility(opt)
-    binding.pry
     FormContactInformation.new(opt)
   end
 
@@ -351,13 +350,13 @@ class FormProfile
   end
 
   def va_profile_phone
+    binding.pry
     home = vet360_contact_info&.home_phone
     return home.area_code + home.phone_number
   end
 
   def va_profile_mobile_phone
-    mobile = vet360_contact_info&.mobile_phone
-    return mobile.area_code + mobile.phone_number
+    return vet360_contact_info&.mobile_phone
   end
 
   def pciu_us_phone

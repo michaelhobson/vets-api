@@ -21,11 +21,15 @@ def stub_vaprofile_user(person = nil)
     ],
     telephones: [
       build(:telephone, :contact_info_v2, :home, id: 458_781),
-      build(:telephone, :contact_info_v2, :home, phone_type: VAProfile::Models::Telephone::MOBILE, id: 790),
+      build(:telephone, :contact_info_v2_mobile, phone_type: VAProfile::Models::Telephone::MOBILE, id: 790),
       build(:telephone, :contact_info_v2, :home, phone_type: VAProfile::Models::Telephone::WORK, id: 791),
       build(:telephone, :contact_info_v2, :home, phone_type: VAProfile::Models::Telephone::FAX, id: 792),
       build(:telephone, :contact_info_v2, :home, phone_type: VAProfile::Models::Telephone::TEMPORARY, id: 793)
     ]
+  )
+
+  allow_any_instance_of(service).to receive(:get_person).and_return(
+    person_response.new(200, person:)
   )
 
   allow_any_instance_of(service).to receive(:get_person).and_return(

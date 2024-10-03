@@ -321,6 +321,7 @@ RSpec.describe FormProfile, type: :model do
       },
       'gender' => user.gender,
       'homePhone' => us_phone,
+      'mobilePhone' => mobile_phone,
       'veteranDateOfBirth' => user.birth_date,
       'veteranSocialSecurityNumber' => user.ssn,
       'email' => user.va_profile_email
@@ -1527,7 +1528,7 @@ RSpec.describe FormProfile, type: :model do
 
     context 'with military information data', :skip_va_profile, :skip_vet360 do
       # DONE
-      context 'with va profile prefill on', :initiate_vaprofile do
+      context 'with va profile prefill on' do
         before do
           VAProfile::Configuration::SETTINGS.prefill = true
 
