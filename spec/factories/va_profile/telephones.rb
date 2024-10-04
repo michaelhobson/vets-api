@@ -52,5 +52,13 @@ FactoryBot.define do
       is_text_permitted { false }
       source_date { '2024-08-27T18:51:06.012Z' }
     end
+
+    trait :contact_info_v2_international do
+      country_code { '355' }
+      phone_type { 'HOME' }
+      is_textable { false }
+      is_text_permitted { false }
+      source_date { '2024-08-27T18:51:06.012Z' }
+    end
   end
 end

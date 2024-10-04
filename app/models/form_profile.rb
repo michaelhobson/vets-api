@@ -349,14 +349,33 @@ class FormProfile
     ''
   end
 
+  def extract_va_profile_phone
+    vet360_contact_info&.home_phone
+  end
+
+  def extract_va_profile_mobile_phone
+    vet360_contact_info&.mobile_phone
+  end
+
   def va_profile_phone
-    binding.pry
-    home = vet360_contact_info&.home_phone
-    return home.area_code + home.phone_number
+    home = extract_va_profile_phone
+    return '' if home.blank?
+    home = home.area_code + home.phone_number if !home.is_a?(String)
+    return home if home.size == 10
+    return home[1..] if home.size == 11 && home[0] == '1'
+
+    ''
   end
 
   def va_profile_mobile_phone
-    return vet360_contact_info&.mobile_phone
+    mobile = extract_va_profile_mobile_phone
+    return '' if mobile.blank?
+    mobile = mobile.area_code + mobile.phone_number if !mobile.is_a?(String)
+
+    return mobile if mobile.size == 10
+    return mobile[1..] if mobile.size == 11 && mobile[0] == '1'
+
+    ''
   end
 
   def pciu_us_phone
