@@ -1781,7 +1781,6 @@ RSpec.describe FormProfile, type: :model do
               form_id = '21P-527EZ'
               prefilled_data = Oj.load(described_class.for(form_id:, user:).prefill.to_json)['form_data']
               schema = strip_required(VetsJsonSchema::SCHEMAS[form_id]).except('anyOf')
-              binding.pry
               schema_data = prefilled_data.deep_dup
               errors = JSON::Validator.fully_validate(
                 schema,

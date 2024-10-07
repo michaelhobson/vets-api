@@ -206,6 +206,7 @@ class FormProfile
     @contact_information = initialize_contact_information
     @military_information = initialize_military_information
     form = form_id == '1010EZ' ? '1010ez' : form_id
+
     if FormProfile.prefill_enabled_forms.include?(form)
       mappings = self.class.mappings_for_form(form_id)
 
@@ -284,11 +285,11 @@ class FormProfile
     opt = {}
     opt.merge!(vets360_contact_info_hash) if vet360_contact_info
     if Flipper.enabled?(:remove_pciu, user)
-      Rails.logger.info("User VAProfile Contact Info, Vet360ID? #{user.vet360_id.present?}, Address? #{opt[:address].present?}
-        Email? #{opt[:email].present?}, Phone? #{opt[:home_phone].present?}")
+      Rails.logger.info("User VAProfile Contact Info, Vet360ID? #{user.vet360_id.present?},
+        Address? #{opt[:address].present?} Email? #{opt[:email].present?}, Phone? #{opt[:home_phone].present?}")
     else
-      Rails.logger.info("User Vet360 Contact Info, Vet360ID? #{user.vet360_id.present?},Address? #{opt[:address].present?}
-        Email? #{opt[:email].present?}, Phone? #{opt[:home_phone].present?}")
+      Rails.logger.info("User Vet360 Contact Info, Vet360ID? #{user.vet360_id.present?},
+        Address? #{opt[:address].present?} Email? #{opt[:email].present?}, Phone? #{opt[:home_phone].present?}")
     end
     opt[:address] ||= user_address_hash
     opt[:email] ||= extract_pciu_data(:pciu_email)
@@ -360,8 +361,9 @@ class FormProfile
   def va_profile_phone
     home = extract_va_profile_phone
     return '' if home.blank?
-    home = home.area_code + home.phone_number if !home.is_a?(String)
-    return home if home.size == 10
+
+    home = home.area_code + home.phone_number unless home.is_a?(String)
+    return home if home.size == 10 || home.size > 11
     return home[1..] if home.size == 11 && home[0] == '1'
 
     ''
@@ -370,7 +372,8 @@ class FormProfile
   def va_profile_mobile_phone
     mobile = extract_va_profile_mobile_phone
     return '' if mobile.blank?
-    mobile = mobile.area_code + mobile.phone_number if !mobile.is_a?(String)
+
+    mobile = mobile.area_code + mobile.phone_number unless mobile.is_a?(String)
 
     return mobile if mobile.size == 10
     return mobile[1..] if mobile.size == 11 && mobile[0] == '1'

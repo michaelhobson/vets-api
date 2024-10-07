@@ -31,6 +31,5 @@ def stub_vaprofile_user(person = nil)
   allow_any_instance_of(service).to receive(:get_person).and_return(
     person_response.new(200, person:)
   )
-
 end
 # rubocop:enable Metrics/MethodLength

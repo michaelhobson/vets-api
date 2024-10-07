@@ -394,11 +394,12 @@ class User < Common::RedisStore
 
   def vet360_contact_info
     return nil unless VAProfile::Configuration::SETTINGS.contact_information.enabled && vet360_id.present?
-    if Flipper.enabled?(:remove_pciu, self)
-      @vet360_contact_info ||= VAProfileRedis::V2::ContactInformation.for_user(self)
-    else
-      @vet360_contact_info ||= VAProfileRedis::ContactInformation.for_user(self)
-    end
+
+    @vet360_contact_info ||= if Flipper.enabled?(:remove_pciu, self)
+                               VAProfileRedis::V2::ContactInformation.for_user(self)
+                             else
+                               VAProfileRedis::ContactInformation.for_user(self)
+                             end
   end
 
   def va_profile_email
@@ -415,12 +416,12 @@ class User < Common::RedisStore
 
   def va_profile_phone
     home = vaprofile_contact_info&.home_phone
-    return home.area_code + home.phone_number
+    home.area_code + home.phone_number
   end
 
   def va_profile_mobile_phone
     mobile = vaprofile_contact_info&.mobile_phone
-    return mobile.area_code + mobile.phone_number
+    mobile.area_code + mobile.phone_number
   end
 
   def all_emails
