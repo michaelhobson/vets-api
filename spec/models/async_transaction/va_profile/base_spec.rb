@@ -35,6 +35,7 @@ RSpec.describe AsyncTransaction::VAProfile::Base, type: :model do
   end
 
   describe '.refresh_transaction_status()' do
+    Flipper.disable(:remove_pciu)
     let(:user) { build(:user, :loa3) }
     let(:transaction1) do
       create(:va_profile_address_transaction,
