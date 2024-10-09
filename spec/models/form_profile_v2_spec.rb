@@ -992,6 +992,12 @@ RSpec.describe FormProfile, type: :model do
     Flipper.disable(ApiProviderFactory::FEATURE_TOGGLE_PPIU_DIRECT_DEPOSIT)
   end
 
+  after do
+    Flipper.disable(:remove_pciu)
+    Flipper.disable(:va_v3_contact_information_service)
+    Flipper.disable(:disability_compensation_remove_pciu)
+  end
+
   describe '#initialize_military_information', :initiate_vaprofile, :skip_va_profile do
     context 'with military_information vaprofile' do
       it 'prefills military data from va profile' do
