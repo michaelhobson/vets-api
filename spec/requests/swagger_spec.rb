@@ -34,6 +34,7 @@ RSpec.describe 'the v0 API documentation', type: %i[apivore request], order: :de
   let(:mhv_user) { build(:user, :mhv, middle_name: 'Bob') }
 
   Flipper.disable(:va_v3_contact_information_service)
+  Flipper.disable(:remove_pciu)
   let(:cassette_path) do
     if Flipper.enabled?(:va_v3_contact_information_service)
       'va_profile/v2/contact_information'
@@ -2240,6 +2241,7 @@ RSpec.describe 'the v0 API documentation', type: %i[apivore request], order: :de
 
     describe 'profiles' do
       Flipper.disable(:va_v3_contact_information_service)
+      Flipper.disable(:remove_pciu)
       let(:mhv_user) { create(:user, :loa3) }
 
       it 'supports getting service history data' do
@@ -2738,6 +2740,7 @@ RSpec.describe 'the v0 API documentation', type: %i[apivore request], order: :de
 
       before do
         Flipper.enable(:va_v3_contact_information_service)
+        Flipper.enable(:remove_pciu)
         allow(VAProfile::Configuration::SETTINGS.contact_information).to receive(:cache_enabled).and_return(true)
         sign_in_as(mhv_user)
       end
@@ -3014,6 +3017,7 @@ RSpec.describe 'the v0 API documentation', type: %i[apivore request], order: :de
 
       before do
         Flipper.enable(:va_v3_contact_information_service)
+        Flipper.enable(:remove_pciu)
         allow(VAProfile::Configuration::SETTINGS.contact_information).to receive(:cache_enabled).and_return(true)
         sign_in_as(user)
       end
@@ -3065,6 +3069,7 @@ RSpec.describe 'the v0 API documentation', type: %i[apivore request], order: :de
 
       before do
         Flipper.enable(:va_v3_contact_information_service)
+        Flipper.enable(:remove_pciu)
         allow_any_instance_of(User).to receive(:vet360_id).and_return('1781151')
       end
 
