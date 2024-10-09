@@ -629,7 +629,7 @@ RSpec.describe FormProfile, type: :model do
         'street2' => va_profile_address[:street2],
         'city' => va_profile_address[:city],
         'state' => va_profile_address[:state],
-        'country' => 'US',
+        'country' => va_profile_address[:country],
         'postal_code' => va_profile_address[:postal_code]
       },
       'claimantPhone' => us_phone,
@@ -701,7 +701,8 @@ RSpec.describe FormProfile, type: :model do
       'bankAccountType' => 'Checking',
       'bankName' => 'Comerica',
       'bankRoutingNumber' => '*****2115',
-      'startedFormVersion' => '2022'
+      'startedFormVersion' => '2022',
+      'syncModern0781Flow' => true
     }
   end
   let(:vfeedback_tool_expected) do
