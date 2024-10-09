@@ -326,9 +326,9 @@ class FormProfile
       street: user.address[:street],
       street2: user.address[:street2],
       city: user.address[:city],
-      state: user.address[:state] || user.address[:state_code],
+      state: user.address[:state],
       country: user.address[:country],
-      postal_code: user.address[:postal_code] || user.address[:zip_code]
+      postal_code: user.address[:postal_code]
     }
   end
 
