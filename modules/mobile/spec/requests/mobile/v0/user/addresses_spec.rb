@@ -9,6 +9,7 @@ RSpec.describe 'Mobile::V0::User::Address', type: :request do
 
   describe 'update endpoints' do
     Flipper.disable(:va_v3_contact_information_service)
+    Flipper.disable(:remove_pciu)
     let(:address) do
       address = build(:va_profile_address, vet360_id: user.vet360_id)
       # Some domestic addresses are coming in with province of string 'null'.
@@ -257,6 +258,7 @@ RSpec.describe 'Mobile::V0::User::Address', type: :request do
 
   describe 'POST /mobile/v0/user/addresses/validate' do
     Flipper.disable(:va_v3_contact_information_service)
+    Flipper.disable(:remove_pciu)
     let(:address) do
       address = build(:va_profile_address, vet360_id: user.vet360_id)
       # Some domestic addresses are coming in with province of string 'null'.
