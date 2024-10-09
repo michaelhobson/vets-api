@@ -1,17 +1,5 @@
 # frozen_string_literal: true
 
-# This will be removed after ContactInformation has been updated
-street = '140 Rock Creek Rd'
-street2 = nil
-
-FactoryBot.define do
-  factory :va_profile_street_check, class: Hash do
-    street { street }
-    street2 { street2 }
-    initialize_with { attributes }
-  end
-end
-
 FactoryBot.define do
   factory :va_profile_address_v2, class: 'VAProfile::Models::V2::Address' do
     address_line1 { '140 Rock Creek Rd' }

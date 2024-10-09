@@ -207,12 +207,12 @@ class User < Common::RedisStore
   def address
     address = mpi_profile&.address || {}
     {
-      street: address[:street] || address[:address_line1],
-      street2: address[:street2] || address[:address_line2],
+      street: address[:street],
+      street2: address[:street2],
       city: address[:city],
-      state: address[:state] || address[:state_code],
-      country: address[:country] || address[:country_code_iso3],
-      postal_code: address[:postal_code] || address[:zip_code]
+      state: address[:state],
+      country: address[:country],
+      postal_code: address[:postal_code]
     }
   end
 

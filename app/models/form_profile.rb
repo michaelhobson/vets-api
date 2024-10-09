@@ -461,7 +461,7 @@ class FormProfile
   end
 
   def clean_hash!(hash)
-    hash.deep_transform_keys! { |k| k.camelize(:lower) }
+    hash.deep_transform_keys! { |k| k.to_s.camelize(:lower) }
     hash.each { |k, v| hash[k] = clean!(v) }
     hash.delete_if { |_k, v| v.blank? }
   end
