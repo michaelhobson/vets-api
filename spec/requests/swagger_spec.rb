@@ -2239,7 +2239,7 @@ RSpec.describe 'the v0 API documentation', type: %i[apivore request], order: :de
       end
     end
 
-    describe 'profiles' do
+    describe 'profiles', :skip_va_profile_user do
       Flipper.disable(:va_v3_contact_information_service)
       Flipper.disable(:remove_pciu)
       let(:mhv_user) { create(:user, :loa3) }
@@ -2699,7 +2699,7 @@ RSpec.describe 'the v0 API documentation', type: %i[apivore request], order: :de
       end
     end
 
-    describe 'profile/person/status/:transaction_id' do
+    describe 'profile/person/status/:transaction_id', :skip_va_profile_user do
       let(:user_without_vet360_id) { build(:user, :loa3) }
       let(:headers) { { '_headers' => { 'Cookie' => sign_in(user_without_vet360_id, nil, true) } } }
 
