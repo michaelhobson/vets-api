@@ -2647,7 +2647,7 @@ RSpec.describe 'the v0 API documentation', type: %i[apivore request], order: :de
       end
     end
 
-    describe 'profile/status' do
+    describe 'profile/status', :skip_va_profile_user do
       before do
         # vet360_id appears in the API request URI so we need it to match the cassette
         allow_any_instance_of(MPIData).to receive(:response_from_redis_or_service).and_return(
