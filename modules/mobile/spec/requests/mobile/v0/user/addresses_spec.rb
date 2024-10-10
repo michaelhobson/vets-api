@@ -7,7 +7,7 @@ RSpec.describe 'Mobile::V0::User::Address', type: :request do
 
   let!(:user) { sis_user }
 
-  describe 'update endpoints' do
+  describe 'update endpoints', :skip_va_profile_user do
     Flipper.disable(:va_v3_contact_information_service)
     Flipper.disable(:remove_pciu)
     let(:address) do
