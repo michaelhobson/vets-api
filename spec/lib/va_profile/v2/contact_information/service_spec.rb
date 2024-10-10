@@ -431,7 +431,7 @@ describe VAProfile::V2::ContactInformation::Service, :skip_vet360 do
     end
   end
 
-  describe '#send_contact_change_notification', :initiate_vaprofile, :skip_vet360 do
+  describe '#send_contact_change_notification', :skip_vet360 do
     let(:transaction) { double }
     let(:transaction_status) do
       OpenStruct.new(

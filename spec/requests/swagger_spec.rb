@@ -2734,7 +2734,7 @@ RSpec.describe 'the v0 API documentation', type: %i[apivore request], order: :de
       end
     end
 
-    describe 'profiles v2', :skip_vet360, :initiate_vaprofile do
+    describe 'profiles v2', :skip_vet360 do
       let(:vet360_id) { '1781151' }
       let(:mhv_user) { build(:user, :loa3, vet360_id:) }
 
@@ -3011,7 +3011,7 @@ RSpec.describe 'the v0 API documentation', type: %i[apivore request], order: :de
       end
     end
 
-    describe 'profile/status v2', :skip_vet360, :initiate_vaprofile do
+    describe 'profile/status v2', :skip_vet360 do
       let(:vet360_id) { '1781151' }
       let(:user) { build(:user, :loa3, vet360_id:) }
 

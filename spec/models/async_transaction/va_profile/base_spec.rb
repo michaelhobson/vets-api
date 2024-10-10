@@ -280,7 +280,7 @@ RSpec.describe AsyncTransaction::VAProfile::Base, type: :model do
     end
   end
 
-  describe '.refresh_transaction_status() v2', :initiate_vaprofile, :skip_vet360 do
+  describe '.refresh_transaction_status() v2', :skip_vet360 do
     let(:user) { build(:user, :loa3) }
     let(:transaction1) do
       create(:address_transaction,

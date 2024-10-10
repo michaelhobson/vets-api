@@ -287,7 +287,7 @@ RSpec.describe 'V0::Profile::EmailAddresses', type: :request do
     end
   end
 
-  describe 'ContactInformationV2', :initiate_vaprofile, :skip_vet360 do
+  describe 'ContactInformationV2', :skip_vet360 do
     let(:contact_info) { VAProfileRedis::V2::ContactInformation.for_user(user) }
 
     before do
@@ -492,7 +492,7 @@ RSpec.describe 'V0::Profile::EmailAddresses', type: :request do
       end
     end
 
-    describe 'DELETE /v0/profile/email_addresses v2', :initiate_vaprofile, :skip_vet360 do
+    describe 'DELETE /v0/profile/email_addresses v2', :skip_vet360 do
       let(:email) do
         build(:email, vet360_id: user.vet360_id, email_address: 'person42@example.com')
       end

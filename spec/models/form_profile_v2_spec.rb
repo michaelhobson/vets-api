@@ -999,7 +999,7 @@ RSpec.describe FormProfile, type: :model do
     Flipper.disable(:disability_compensation_remove_pciu)
   end
 
-  describe '#initialize_military_information', :initiate_vaprofile, :skip_va_profile do
+  describe '#initialize_military_information', :skip_va_profile do
     context 'with military_information vaprofile' do
       it 'prefills military data from va profile' do
         VCR.use_cassette('va_profile/military_personnel/post_read_service_histories_200',
@@ -1034,7 +1034,7 @@ RSpec.describe FormProfile, type: :model do
     end
   end
 
-  describe '#initialize_va_profile_prefill_military_information', :initiate_vaprofile do
+  describe '#initialize_va_profile_prefill_military_information' do
     context 'when va profile is down in production' do
       it 'logs exception and returns empty hash' do
         expect(form_profile).to receive(:log_exception_to_sentry).with(
@@ -1065,7 +1065,7 @@ RSpec.describe FormProfile, type: :model do
     end
   end
 
-  describe '#va_profile_phone', :initiate_vaprofile, :skip_va_profile, :skip_vet360 do
+  describe '#va_profile_phone', :skip_va_profile, :skip_vet360 do
     def self.test_va_profile_phone(primary, expected)
       it "returns #{expected}" do
         allow_any_instance_of(FormProfile).to receive(:extract_va_profile_phone).and_return(primary)
@@ -1128,7 +1128,7 @@ RSpec.describe FormProfile, type: :model do
       )
     end
 
-    context 'with a user that can prefill 10-10EZR', :initiate_vaprofile do
+    context 'with a user that can prefill 10-10EZR' do
       let(:form_profile) do
         FormProfiles::VA1010ezr.new(user:, form_id: 'f')
       end
@@ -1240,7 +1240,7 @@ RSpec.describe FormProfile, type: :model do
       end
     end
 
-    context 'with a user that can prefill mdot', :initiate_vaprofile do
+    context 'with a user that can prefill mdot' do
       before do
         expect(user).to receive(:authorize).with(:mdot, :access?).and_return(true).at_least(:once)
         expect(user).to receive(:authorize).with(:va_profile, :access?).and_return(true).at_least(:once)
@@ -1254,7 +1254,7 @@ RSpec.describe FormProfile, type: :model do
       end
     end
 
-    context 'with a user that can prefill financial status report', :initiate_vaprofile do
+    context 'with a user that can prefill financial status report' do
       let(:comp_and_pen_payments) do
         [
           { payment_date: DateTime.now - 2.months, payment_amount: '1500' },
@@ -1371,7 +1371,7 @@ RSpec.describe FormProfile, type: :model do
       end
     end
 
-    context 'with military information data', :initiate_vaprofile, :skip_va_profile, :skip_vet360 do
+    context 'with military information data', :skip_va_profile, :skip_vet360 do
       context 'with va profile prefill on' do
         before do
           VAProfile::Configuration::SETTINGS.prefill = true
@@ -1628,7 +1628,7 @@ RSpec.describe FormProfile, type: :model do
       end
     end
 
-    context 'with a burial application form', :initiate_vaprofile do
+    context 'with a burial application form' do
       it 'returns the va profile mapped to the burial form' do
         expect_prefilled('21P-530V2')
       end
@@ -1656,7 +1656,7 @@ RSpec.describe FormProfile, type: :model do
       end
     end
 
-    context 'with a higher level review form', :initiate_vaprofile do
+    context 'with a higher level review form' do
       let(:schema_name) { '20-0996' }
       let(:schema) { VetsJsonSchema::SCHEMAS[schema_name] }
 
@@ -1703,7 +1703,7 @@ RSpec.describe FormProfile, type: :model do
       end
     end
 
-    context 'with a notice of disagreement (NOD) form', :initiate_vaprofile do
+    context 'with a notice of disagreement (NOD) form' do
       let(:schema_name) { '10182' }
       let(:schema) do
         DecisionReview::Schemas::NOD_CREATE_REQUEST.merge '$schema': 'http://json-schema.org/draft-04/schema#'
@@ -1758,7 +1758,7 @@ RSpec.describe FormProfile, type: :model do
       end
     end
 
-    context 'when the form mapping can not be found', :initiate_vaprofile do
+    context 'when the form mapping can not be found' do
       it 'raises an IOError' do
         allow(FormProfile).to receive(:prefill_enabled_forms).and_return(['foo'])
 
@@ -1766,14 +1766,14 @@ RSpec.describe FormProfile, type: :model do
       end
     end
 
-    context 'when the form does not use prefill', :initiate_vaprofile do
+    context 'when the form does not use prefill' do
       it 'does not raise an error' do
         expect { described_class.new(form_id: '21-4142', user:).prefill }.not_to raise_error
       end
     end
   end
 
-  describe '.mappings_for_form', :initiate_vaprofile do
+  describe '.mappings_for_form' do
     context 'with multiple form profile instances' do
       let(:instance1) { FormProfile.new(form_id: '1010ez', user:) }
       let(:instance2) { FormProfile.new(form_id: '1010ez', user:) }
