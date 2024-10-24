@@ -8,7 +8,7 @@ require 'gi/client'
 RSpec.describe FormProfile, type: :model do
   include SchemaMatchers
 
-  let(:user) { build(:user, :loa3, suffix: 'Jr.', address: build(:va_profile_address_v2), vet360_id: '1781151') }
+  let(:user) { build(:user, :loa3, suffix: 'Jr.', address: build(:va_profile_v3_address), vet360_id: '1781151') }
   let(:form_profile) do
     described_class.new(form_id: 'foo', user:)
   end
