@@ -14,6 +14,8 @@ RSpec.describe 'V0::User', type: :request do
     let!(:mhv_user_verification) { create(:mhv_user_verification, mhv_uuid: mhv_user.mhv_correlation_id) }
 
     before do
+      Flipper.disable(:va_v3_contact_information_service)
+      Flipper.disable(:remove_pciu)
       allow(SM::Client).to receive(:new).and_return(authenticated_client)
       allow_any_instance_of(MHVAccountTypeService).to receive(:mhv_account_type).and_return('Premium')
       create(:account, idme_uuid: mhv_user.uuid)
@@ -260,6 +262,8 @@ RSpec.describe 'V0::User', type: :request do
 
     before do
       create(:user_verification, idme_uuid: user.idme_uuid)
+      Flipper.disable(:va_v3_contact_information_service)
+      Flipper.disable(:remove_pciu)
       VCR.use_cassette('va_profile/veteran_status/va_profile_veteran_status_200', allow_playback_repeats: true) do
         sign_in_as(user)
         allow_any_instance_of(User).to receive(:edipi).and_return(edipi)
