@@ -14,6 +14,7 @@ RSpec.describe 'transactions' do
 
     before do
       Flipper.disable(:va_v3_contact_information_service)
+      Flipper.disable(:remove_pciu)
       allow(VAProfile::Configuration::SETTINGS.contact_information).to receive(:cache_enabled).and_return(true)
       user.vet360_contact_info
       sign_in_as(user)
@@ -96,6 +97,7 @@ RSpec.describe 'transactions' do
 
     before do
       Flipper.disable(:va_v3_contact_information_service)
+      Flipper.disable(:remove_pciu)
       allow(VAProfile::Configuration::SETTINGS.contact_information).to receive(:cache_enabled).and_return(true)
       user.vet360_contact_info
       sign_in_as(user)
