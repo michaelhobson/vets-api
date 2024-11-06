@@ -425,7 +425,7 @@ class User < Common::RedisStore
 
   def va_profile_mobile_phone
     mobile = vaprofile_contact_info&.mobile_phone
-    mobile.area_code + mobile.phone_number
+    mobile&.area_code.to_s + mobile&.phone_number.to_s
   end
 
   def all_emails

@@ -40,7 +40,7 @@ class FormProfiles::VA686c674 < FormProfile
                     else
                       VAProfileRedis::ContactInformation.for_user(user)
                     end
-    mailing_address = redis_prefill.mailing_address if user.vet360_id.present?
+    mailing_address = redis_prefill&.mailing_address if user.vet360_id.present?
     return if mailing_address.blank?
 
     @form_address = FormAddress.new(
